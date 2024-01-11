@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { FormsModule } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-cadastro',
-  imports:[FormsModule],
+
   templateUrl: './cadastro.component.html',
   styleUrls: ['./cadastro.component.css']
 })
@@ -18,13 +19,20 @@ export class CadastroComponent {
     senha: ''
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
 
-  cadastrarUsuario() {
-    this.http.post('http://localhost:8080/api/usuarios/cadastro', this.usuario).subscribe(
+  cadastrarUsuario(): void {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    this.http.post('http://localhost:8080/api/usuarios/cadastro', this.usuario, { headers }).subscribe(
       (response: any) => {
         console.log('Usuário cadastrado com sucesso!', response);
-        // Aqui você pode redirecionar para outra página ou mostrar uma mensagem de sucesso.
+        
+        this.authService.setToken(response.token);
+        this.router.navigate(['/login']);  // Redirecionar para a página de login após o cadastro
+
       },
       (error) => {
         console.error('Erro ao cadastrar usuário:', error.error);
